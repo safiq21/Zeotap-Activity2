@@ -1,0 +1,118 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f8ff;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.weather-app {
+    width: 80%;
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.header {
+    background-image: url('city-background.jpg');
+    background-size: cover;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.header h1 {
+    font-size: 2em;
+}
+
+.header p {
+    font-size: 1.2em;
+}
+
+.current-weather {
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.current-weather img {
+    width: 100px;
+    height: 100px;
+}
+
+.temperature {
+    font-size: 3em;
+    margin: 10px 0;
+}
+
+.weather-info {
+    font-size: 1.2em;
+    color: #666;
+}
+
+.hourly-forecast {
+    padding: 20px;
+    background-color: #fff;
+}
+
+.hourly-cards {
+    display: flex;
+    overflow-x: scroll;
+}
+
+.hour-card {
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    padding: 10px;
+    margin-right: 10px;
+    text-align: center;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.hour-card img {
+    width: 40px;
+    height: 40px;
+}
+
+.weekly-forecast {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.weekly-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.day-card {
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    width: 120px;
+    margin-bottom: 10px;
+}
+
+.day-card img {
+    width: 40px;
+    height: 40px;
+}
+
+.extra-info {
+    padding: 20px;
+    background-color: #fff;
+    text-align: center;
+    font-size: 1.1em;
+}
