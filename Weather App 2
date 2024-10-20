@@ -1,0 +1,99 @@
+import time
+import sqlite3
+from datetime import datetime
+from flask import Flask, render_template
+import random
+
+# Constants
+CITIES = ['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata', 'Hyderabad']
+DB_NAME = 'weather_data.db'
+ALERT_THRESHOLD = 35  # Example threshold for temperature alerts
+
+# Flask app setup
+app = Flask(__name__)
+
+# Database setup
+def setup_database():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS daily_summary (
+            date TEXT PRIMARY KEY,
+            avg_temp REAL,
+            max_temp REAL,
+            min_temp REAL,
+            dominant_condition TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Function to generate mock weather data
+def generate_mock_weather_data(city):
+    # Generate random temperature and weather condition
+    temp_c = random.uniform(20, 40)  # Random temperature between 20°C and 40°C
+    conditions = ['Clear', 'Clouds', 'Rain', 'Thunderstorm', 'Drizzle']
+    main_weather = random.choice(conditions)
+    return {
+        'name': city,
+        'main': {
+            'temp': temp_c
+        },
+        'weather': [{'main': main_weather}]
+    }
+
+# Function to process and store daily summary
+def process_weather_data(data):
+    if not data:
+        return
+
+    main_weather = data['weather'][0]['main']
+    temp_c = data['main']['temp']
+    
+    # Store the data in the database
+    today = datetime.now().strftime('%Y-%m-%d')
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO daily_summary (date, avg_temp, max_temp, min_temp, dominant_condition)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET
+            avg_temp = (avg_temp + ?) / 2,
+            max_temp = CASE WHEN max_temp > ? THEN max_temp ELSE ? END,
+            min_temp = CASE WHEN min_temp < ? THEN min_temp ELSE ? END,
+            dominant_condition = ?
+    ''', (today, temp_c, temp_c, temp_c, main_weather, temp_c, temp_c, main_weather))
+    
+    conn.commit()
+    conn.close()
+
+    # Alerting logic
+    if temp_c > ALERT_THRESHOLD:
+        print(f"ALERT: {data['name']} - Temperature exceeded {ALERT_THRESHOLD}°C: {temp_c:.2f}°C")
+
+# Main loop for continuous data retrieval
+def run_weather_monitor():
+    setup_database()
+    while True:
+        for city in CITIES:
+            data = generate_mock_weather_data(city)
+            process_weather_data(data)
+        time.sleep(300)  # Wait for 5 minutes
+
+# Flask route to display the weather summary
+@app.route('/')
+def index():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM daily_summary")
+    summaries = cursor.fetchall()
+    conn.close()
+    
+    return render_template('index.html', summaries=summaries)
+
+# Start the weather monitor in a separate thread
+if __name__ == "__main__":
+    import threading
+    threading.Thread(target=run_weather_monitor, daemon=True).start()
+    app.run(debug=True)
